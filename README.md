@@ -24,8 +24,9 @@ de la machine, à communiquer à l'appareil avec lequel vous voulez vous synchro
    icône et thèmes.
 3. Génère l'identité Syncthing de la machine (device ID, `cert.pem`, `key.pem`).
 4. Applique le thème `mountain theme`.
-5. Crée un raccourci dans le dossier Démarrage (lancement automatique à l'ouverture de session,
-   sans fenêtre) et un raccourci sur le Bureau.
+5. Crée la tâche planifiée **Syncthing Tray**, qui lance l'icône de notification à l'ouverture
+   de session, sans aucune fenêtre, et un raccourci sur le Bureau pour relancer Syncthing après
+   l'avoir quitté.
 6. Lance Syncthing et ouvre l'interface.
 
 Relancer la commande met à jour le binaire, les scripts et les thèmes, **sans toucher** à
@@ -37,7 +38,6 @@ l'identité de la machine ni aux dossiers déjà synchronisés.
 |---|---|
 | `install.ps1` | L'installeur, cible du one-liner. |
 | `payload/Syncthing_Tray.ps1` | Icône dans la zone de notification : ouvrir l'interface, quitter Syncthing. |
-| `payload/SyncthingTray.vbs` | Lance le script précédent sans aucune fenêtre. |
 | `payload/syncthing.ico` | Icône des raccourcis. |
 | `payload/gui/mountain theme/` | Thème sombre (appliqué par défaut). |
 | `payload/gui/mountain light/` | Thème clair. |
@@ -45,6 +45,26 @@ l'identité de la machine ni aux dossiers déjà synchronisés.
 Les deux thèmes restent sélectionnables dans **Actions > Configuration > Interface graphique**.
 Syncthing sert toujours le thème actif à la même adresse (`assets/css/theme.css`) : après un
 changement de thème, faites **Ctrl+F5** dans le navigateur, sinon l'ancien reste en cache.
+
+## Démarrage sans fenêtre
+
+L'icône de notification est un script PowerShell, et PowerShell est un programme console :
+lancé naïvement, il ouvre une fenêtre noire à chaque ouverture de session. Le lanceur est donc
+`conhost.exe --headless`, qui démarre PowerShell dans une pseudo-console **sans aucune fenêtre**.
+
+Les autres approches ont toutes été écartées, mesures à l'appui :
+
+| Approche | Verdict |
+|---|---|
+| `conhost --headless` (retenue) | Aucune fenêtre, aucune console créée. Natif Windows, aucune dépendance. |
+| Raccourci vers `powershell -WindowStyle Hidden` | Un raccourci Windows ne sait pas lancer « masqué », seulement « réduit » : la console est créée puis cachée, d'où un clignotement possible. |
+| Lanceur VBScript (`wscript.exe`) | Utilisé jusqu'ici. Fonctionne, mais VBScript est **déprécié par Microsoft** et `wscript.exe` est ciblé par les règles ASR de Defender. |
+| AutoHotkey | Ajoute un interpréteur tiers, hors AMSI et souvent signalé par les antivirus. Aucun gain. |
+
+Le démarrage automatique passe par une **tâche planifiée** plutôt que par un raccourci dans le
+dossier Démarrage : elle s'inventorie d'une seule commande (`Get-ScheduledTask`). L'option
+`-ExecutionPolicy Bypass` n'est pas décorative : sans elle, la tâche se termine sur le code
+`0x1` sans jamais lancer le script.
 
 ## Vie privée
 
@@ -57,8 +77,8 @@ toute façon pas se synchroniser entre elles. Chaque installation génère la si
 
 ```powershell
 # Quitter Syncthing par l'icône de la zone de notification, puis :
+Unregister-ScheduledTask -TaskName "Syncthing Tray" -Confirm:$false
 Remove-Item "$env:LOCALAPPDATA\Syncthing" -Recurse -Force
-Remove-Item "$([Environment]::GetFolderPath('Startup'))\Syncthing.lnk" -Force
 Remove-Item "$([Environment]::GetFolderPath('Desktop'))\Syncthing.lnk" -Force
 ```
 

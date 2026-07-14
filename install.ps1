@@ -33,9 +33,10 @@ param(
 $ErrorActionPreference = 'Stop'
 try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
 
-$Dest    = Join-Path $env:LOCALAPPDATA 'Syncthing'
-$Work    = Join-Path ([IO.Path]::GetTempPath()) ("syncthing-config-" + [Guid]::NewGuid().ToString('N').Substring(0, 8))
-$Headers = @{ 'User-Agent' = 'syncthing-config-installer' }
+$Dest     = Join-Path $env:LOCALAPPDATA 'Syncthing'
+$Work     = Join-Path ([IO.Path]::GetTempPath()) ("syncthing-config-" + [Guid]::NewGuid().ToString('N').Substring(0, 8))
+$Headers  = @{ 'User-Agent' = 'syncthing-config-installer' }
+$TaskName = 'Syncthing Tray'
 
 function Write-Step($Message) { Write-Host "  $Message" -ForegroundColor Cyan }
 function Write-Done($Message) { Write-Host "  $Message" -ForegroundColor Green }
@@ -181,29 +182,63 @@ try {
 
     $xml.Save($configXml)
 
-    # --- Raccourcis Demarrage et Bureau ---------------------------------------
+    # --- Demarrage automatique et raccourci Bureau -----------------------------
+    # Le lanceur est conhost.exe --headless : il demarre PowerShell dans une
+    # pseudo-console sans fenetre. Les alternatives echouent toutes sur ce point :
+    # un raccourci Windows ne sait pas lancer un programme masque (au mieux
+    # "reduit"), et powershell -WindowStyle Hidden cree une console avant de la
+    # cacher, donc un clignotement reste possible. --headless n'en cree aucune.
+    #
+    # -ExecutionPolicy Bypass n'est PAS decoratif : sans lui, la tache planifiee
+    # se termine sur le code 0x1 sans jamais lancer le script (mesure 2026-07-14).
+    # L'ancien lanceur VBScript le passait deja.
 
-    Write-Step "Creation des raccourcis (demarrage automatique et bureau)..."
-    $shell   = New-Object -ComObject WScript.Shell
-    $vbsPath = Join-Path $Dest 'SyncthingTray.vbs'
-    $targets = @(
+    $psExe    = Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    $conhost  = Join-Path $env:WINDIR 'System32\conhost.exe'
+    $trayPs1  = Join-Path $Dest 'Syncthing_Tray.ps1'
+    $trayArgs = "--headless $psExe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$trayPs1`""
+
+    # Migration des installations a base de VBScript : wscript.exe est un vecteur
+    # d'attaque classique (regles ASR de Defender) et VBScript est deprecie par
+    # Microsoft. On retire l'ancien raccourci de demarrage et le script obsolete.
+
+    Write-Step "Configuration du demarrage automatique..."
+    $obsolete = @(
         (Join-Path ([Environment]::GetFolderPath('Startup')) 'Syncthing.lnk'),
-        (Join-Path ([Environment]::GetFolderPath('Desktop')) 'Syncthing.lnk')
+        (Join-Path $Dest 'SyncthingTray.vbs')
     )
-    foreach ($lnkPath in $targets) {
-        $lnk = $shell.CreateShortcut($lnkPath)
-        $lnk.TargetPath       = Join-Path $env:WINDIR 'System32\wscript.exe'
-        $lnk.Arguments        = '"' + $vbsPath + '"'
-        $lnk.WorkingDirectory = $Dest
-        $lnk.IconLocation     = Join-Path $Dest 'syncthing.ico'
-        $lnk.Description      = 'Syncthing'
-        $lnk.Save()
+    foreach ($path in $obsolete) {
+        if (Test-Path $path) { Remove-Item -Path $path -Force -ErrorAction SilentlyContinue }
     }
+
+    # Tache planifiee plutot qu'un raccourci dans le dossier Demarrage : elle est
+    # inventoriable d'une seule commande (Get-ScheduledTask) et n'a besoin
+    # d'aucun interpreteur tiers.
+
+    $action   = New-ScheduledTaskAction -Execute $conhost -Argument $trayArgs
+    $trigger  = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries `
+                    -DontStopIfGoingOnBatteries -ExecutionTimeLimit ([TimeSpan]::Zero)
+    Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger `
+        -Settings $settings -Force | Out-Null
+    Write-Done "Demarrage automatique : tache planifiee '$TaskName'."
+
+    # Raccourci Bureau : relancer le tray apres un "Quitter Syncthing".
+
+    Write-Step "Creation du raccourci sur le Bureau..."
+    $shell = New-Object -ComObject WScript.Shell
+    $lnk = $shell.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Desktop')) 'Syncthing.lnk'))
+    $lnk.TargetPath       = $conhost
+    $lnk.Arguments        = $trayArgs
+    $lnk.WorkingDirectory = $Dest
+    $lnk.IconLocation     = Join-Path $Dest 'syncthing.ico'
+    $lnk.Description      = 'Syncthing'
+    $lnk.Save()
 
     # --- Lancement ------------------------------------------------------------
 
     Write-Step "Demarrage de Syncthing..."
-    Start-Process -FilePath (Join-Path $env:WINDIR 'System32\wscript.exe') -ArgumentList "`"$vbsPath`""
+    Start-ScheduledTask -TaskName $TaskName
 
     $deviceId = (& (Join-Path $Dest 'syncthing.exe') device-id --home $Dest) | Select-Object -First 1
 
