@@ -1,245 +1,540 @@
-/* ==========================================================
-   THEME : mountain light — MontagneJour (LIGHT SOFT)
-   ========================================================== */
+/* ==========================================================================
+   mountain light — variante claire (MontagneJour)
+   Theme personnalise pour l'interface web de Syncthing.
 
-/* === BACKGROUND GLOBAL === */
+   Meme structure que « mountain theme » : seules la palette et la photo de fond
+   changent. Les etats Bootstrap (.open, .active, :focus, [disabled],
+   .table-striped, option, .popover...) sont couverts ici aussi, sans quoi ils
+   retombent sur les gris ternes de Bootstrap au lieu du verre clair du theme.
+
+   theme.css est charge apres bootstrap.css : une specificite egale suffit a
+   gagner la cascade, d'ou l'absence de !important.
+   ========================================================================== */
+
+:root {
+    /* Surfaces */
+    --mt-surface:        rgba(255, 255, 255, 0.72);  /* cartes, panneaux (verre)   */
+    --mt-surface-raised: rgba(15, 30, 55, 0.06);     /* en-tetes, lignes survolees */
+    --mt-overlay:        rgba(252, 253, 255, 0.95);  /* menus, modales, popovers    */
+    --mt-sunken:         rgba(255, 255, 255, 0.85);  /* champs de saisie            */
+
+    /* Traits */
+    --mt-border:        rgba(20, 40, 70, 0.14);
+    --mt-border-strong: rgba(20, 40, 70, 0.26);
+
+    /* Texte */
+    --mt-text:       #16202e;
+    --mt-text-muted: #4c5c70;
+    --mt-text-dim:   #8494a6;
+
+    /* Accent et etats semantiques */
+    --mt-accent:      #1f6fc4;
+    --mt-accent-ink:  #ffffff;   /* texte pose sur l'accent */
+    --mt-success:     #1e8f60;
+    --mt-warning:     #b57d12;
+    --mt-danger:      #c3382c;
+    --mt-info:        #3a63a8;
+
+    /* Geometrie et profondeur */
+    --mt-radius:    14px;
+    --mt-radius-sm: 10px;
+    --mt-blur:      18px;
+    --mt-shadow:       0 10px 30px rgba(20, 40, 70, 0.14);
+    --mt-shadow-float: 0 20px 50px rgba(20, 40, 70, 0.24);
+}
+
+/* ==========================================================================
+   FOND ET TYPOGRAPHIE
+   Un voile clair est pose sur la photo : sans lui, le texte sombre devient
+   illisible sur les zones sombres du relief.
+   ========================================================================== */
+
+/* L'attachement est declare couche par couche : dans le raccourci `background`,
+   le mot-cle `fixed` ne s'appliquerait qu'a la derniere couche. Le degrade
+   resterait en `scroll`, dimensionne a la hauteur du contenu, et s'arreterait
+   net en bas de page — la photo reapparaissait alors sans son voile. */
 body {
-    background: url("../img/MontagneJour.jpg") no-repeat center center fixed !important; /* Image de fond */
-    background-size: cover !important; /* L’image couvre l’écran */
-    color: #242c33 !important; /* Couleur du texte général */
-    font-family: "Neo Sans Std", sans-serif !important; /* Police */
+    background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(223, 234, 248, 0.90)),
+        url("../img/MontagneJour.jpg");
+    background-repeat: no-repeat, no-repeat;
+    background-position: center center, center center;
+    background-attachment: fixed, fixed;
+    background-size: cover, cover;
+    color: var(--mt-text);
 }
 
-/* ==========================================================
-   PANNEAUX — conteneurs principaux
-   ========================================================== */
-.panel,           /* Panneaux standard */
-.device,          /* Blocs appareils */
-.folder,          /* Blocs dossiers */
-.card,            /* Blocs cartes */
-.well,            /* Ancienne classe Bootstrap */
-.panel-default {  /* Panneaux par défaut */
-    background: rgba(255, 255, 255, 0.20) !important; /* Transparence du panneau */
-    border-radius: 14px !important; /* Coins arrondis */
-    border: 1px solid rgba(255,255,255,0.35) !important; /* Bordure claire */
-    backdrop-filter: blur(18px) !important; /* Effet glass */
-    -webkit-backdrop-filter: blur(18px) !important; /* Effet glass Safari */
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12) !important; /* Ombre douce */
+h1, h2, h3, h4, h5 { color: #0d1724; }
+
+a         { color: var(--mt-accent); }
+a:hover,
+a:focus   { color: #17558f; }
+
+hr        { border-top-color: var(--mt-border); }
+small,
+.text-muted,
+.help-block { color: var(--mt-text-muted); }
+
+::selection { background: rgba(31, 111, 196, 0.22); color: #0d1724; }
+
+:focus-visible {
+    outline: 2px solid var(--mt-accent);
+    outline-offset: 2px;
 }
 
-/* Suppression des rectangles autour des blocs Syncthing */
-.folder,
-.folder:hover,
-.folder:focus,
-.device,
-.device:hover,
-.device:focus,
-.panel-default,
-.panel-default:hover,
-.panel-default:focus {
-    background: transparent !important; /* On retire les parasites */
-    border: none !important; /* Supprime les bordures */
-    box-shadow: none !important; /* Supprime l’ombre */
+/* ==========================================================================
+   BARRE DE NAVIGATION
+   ========================================================================== */
+
+/* Le flou est porte par un pseudo-element, jamais par la barre elle-meme : un
+   backdrop-filter clippe la peinture ET le hit-testing de ses descendants a sa
+   propre boite. Pose sur .navbar-default, il amputait le menu deroulant de
+   toutes les entrees depassant sous la barre — invisibles et non cliquables.
+   Le menu n'est pas un descendant du pseudo-element : il echappe au clip. */
+.navbar-default {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--mt-border);
 }
 
-/* Le vrai panneau glass (barre gris/blanc derrière le dossier) */
-.folder .panel-heading,
-.device .panel-heading,
-.panel-default .panel-heading {
-    background: rgba(255,255,255,0.22) !important; /* Transparence contrôlée */
-    border-radius: 14px !important; /* Coins arrondis */
-    border: 1px solid rgba(255,255,255,0.35) !important; /* Bordure */
-    backdrop-filter: blur(18px) !important; /* Effet glass */
-    -webkit-backdrop-filter: blur(18px) !important; /* Safari */
-    box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important; /* Ombre */
+.navbar-default::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(var(--mt-blur));
+    -webkit-backdrop-filter: blur(var(--mt-blur));
 }
 
-/* Hover propre des dossiers */
-.folder:hover .panel-heading,
-.device:hover .panel-heading,
-.panel-default:hover .panel-heading {
-    background: rgba(255,255,255,0.28) !important; /* Légèrement plus clair */
-    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure plus visible */
-    box-shadow: 0 6px 16px rgba(0,0,0,0.20) !important; /* Ombre accentuée */
+/* Le pseudo-element est positionne : sans cela il recouvrirait le contenu de
+   la barre, qui n'est pas positionne. */
+.navbar-default > .container { position: relative; }
+
+/* Bootstrap force les coins hauts du menu a 0 pour le coller sous la barre.
+   Le menu est ici une carte flottante : coins arrondis et leger detachement. */
+.navbar-nav > li > .dropdown-menu {
+    border-radius: var(--mt-radius-sm);
+    margin-top: 6px;
 }
 
-/* ==========================================================
-   MODALES — aucune zone blanche
-   ========================================================== */
+.navbar-default .navbar-brand,
+.navbar-default .navbar-text,
+.navbar-default .navbar-nav > li > a,
+.navbar-default .navbar-link { color: var(--mt-text); }
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+    color: #0d1724;
+    background: var(--mt-surface-raised);
+}
+
+/* L'etat ouvert : Bootstrap y met un gris #e7e7e7 qui casse le verre clair et
+   avale le contraste du libelle. */
+.navbar-default .navbar-nav > .open > a,
+.navbar-default .navbar-nav > .open > a:hover,
+.navbar-default .navbar-nav > .open > a:focus,
+.nav .open > a,
+.nav .open > a:hover,
+.nav .open > a:focus {
+    background: rgba(15, 30, 55, 0.10);
+    border-color: var(--mt-border);
+    color: #0d1724;
+}
+
+.navbar-default .navbar-toggle { border-color: var(--mt-border); }
+.navbar-default .navbar-toggle:hover,
+.navbar-default .navbar-toggle:focus { background: var(--mt-surface-raised); }
+.navbar-default .navbar-toggle .icon-bar { background: var(--mt-text); }
+
+/* ==========================================================================
+   SURFACES FLOTTANTES — menus, modales, popovers, infobulles
+   Elles doivent masquer le contenu qui passe dessous : translucidite forte plus
+   flou d'arriere-plan, jamais une simple transparence qui laisserait fantomer
+   le texte de la page.
+   ========================================================================== */
+
+.dropdown-menu {
+    background: var(--mt-overlay);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius-sm);
+    box-shadow: var(--mt-shadow-float);
+    backdrop-filter: blur(var(--mt-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--mt-blur)) saturate(120%);
+    padding: 6px;
+}
+
+.dropdown-menu > li > a {
+    color: var(--mt-text);
+    border-radius: 8px;
+    padding: 7px 12px;
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+    background: var(--mt-surface-raised);
+    color: #0d1724;
+}
+
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+    background: rgba(31, 111, 196, 0.14);
+    color: #0d1724;
+}
+
+.dropdown-menu > .disabled > a,
+.dropdown-menu > .disabled > a:hover,
+.dropdown-menu > .disabled > a:focus {
+    color: var(--mt-text-dim);
+    background: transparent;
+}
+
+.dropdown-menu .divider {
+    background: var(--mt-border);
+    margin: 6px 4px;
+}
+
+.dropdown-header { color: var(--mt-text-dim); }
+
 .modal-content {
-    background: rgba(255,255,255,0.28) !important; /* Fond glass */
-    border-radius: 16px !important; /* Coins arrondis */
-    border: 1px solid rgba(255,255,255,0.45) !important; /* Bordure */
-    backdrop-filter: blur(22px) !important; /* Effet glass */
+    background: var(--mt-overlay);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius);
+    box-shadow: var(--mt-shadow-float);
+    backdrop-filter: blur(var(--mt-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--mt-blur)) saturate(120%);
 }
 
 .modal-header {
-    background: rgba(255,255,255,0.22) !important; /* Fond header */
-    border-bottom: 1px solid rgba(255,255,255,0.40) !important; /* Bordure basse */
+    border-bottom: 1px solid var(--mt-border);
+    color: #0d1724;
 }
 
-.modal-footer {
-    background: rgba(255,255,255,0.20) !important; /* Fond footer */
-    border-top: 1px solid rgba(255,255,255,0.35) !important; /* Bordure haute */
+.modal-footer  { border-top: 1px solid var(--mt-border); }
+.modal-title   { color: #0d1724; }
+
+.modal-backdrop,
+.modal-backdrop.in {
+    background: #16202e;
+    opacity: 0.35;
 }
 
-/* Onglets (Général / Interface / Connexions / etc.) */
-.nav-tabs > li > a {
-    background: rgba(255,255,255,0.22) !important; /* Fond des onglets */
-    color: #273038 !important; /* Texte */
-    border-radius: 10px 10px 0 0 !important; /* Coins supérieurs */
-    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure */
+.popover {
+    background: var(--mt-overlay);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius-sm);
+    box-shadow: var(--mt-shadow-float);
+    color: var(--mt-text);
 }
+.popover-title {
+    background: var(--mt-surface-raised);
+    border-bottom: 1px solid var(--mt-border);
+    color: var(--mt-text);
+}
+.popover.top    > .arrow::after { border-top-color: var(--mt-overlay); }
+.popover.bottom > .arrow::after { border-bottom-color: var(--mt-overlay); }
+.popover.left   > .arrow::after { border-left-color: var(--mt-overlay); }
+.popover.right  > .arrow::after { border-right-color: var(--mt-overlay); }
 
-.nav-tabs > li.active > a {
-    background: rgba(255,255,255,0.30) !important; /* Onglet actif */
-    color: #000 !important; /* Texte noir */
-    border-bottom-color: transparent !important; /* Pas de bordure basse */
+.tooltip-inner {
+    background: #16202e;
+    border-radius: 8px;
+    color: #f2f6fb;
+    box-shadow: var(--mt-shadow);
 }
+.tooltip.top    .tooltip-arrow { border-top-color: #16202e; }
+.tooltip.bottom .tooltip-arrow { border-bottom-color: #16202e; }
+.tooltip.left   .tooltip-arrow { border-left-color: #16202e; }
+.tooltip.right  .tooltip-arrow { border-right-color: #16202e; }
 
-/* ==========================================================
-   BOUTONS — version Light Soft
-   ========================================================== */
-.btn,
-button,
-input[type="button"],
-input[type="submit"] {
-    background: rgba(255,255,255,0.32) !important; /* TRANSPARENCE FIXÉE (moins pâle qu’avant) */
-    color: #1b242a !important; /* Texte */
-    border-radius: 12px !important; /* Coins */
-    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure */
-    backdrop-filter: blur(8px) !important; /* Effet glass */
-    font-weight: 600 !important; /* Texte bold */
-    padding: 6px 14px !important; /* Taille */
-    transition: 0.25s ease !important; /* Animation */
-}
-
-/* Hover sur les boutons */
-.btn:hover,
-button:hover {
-    background: rgba(255,255,255,0.40) !important; /* Plus clair */
-    transform: translateY(-1px); /* Effet flottant */
-    color: #000 !important; /* Texte noir */
-}
-
-/* Boutons désactivés */
-.btn:disabled,
-button:disabled {
-    background: rgba(255,255,255,0.22) !important; /* Fond atténué */
-    color: rgba(0,0,0,0.35) !important; /* Texte grisé */
-    border: 1px solid rgba(255,255,255,0.25) !important; /* Bordure soft */
-}
-
-/* Bouton rouge Danger */
-.btn-danger {
-    background: rgba(240,70,70,0.75) !important; /* Rouge opaque */
-    color: #fff !important; /* Texte blanc */
-}
-.btn-danger:hover {
-    background: rgba(220,50,50,0.85) !important; /* Rouge plus sombre */
-}
-
-/* ==========================================================
-   INPUTS / SELECT
-   ========================================================== */
-input,
-select,
-textarea {
-    background: rgba(255,255,255,0.32) !important; /* Fond input glass */
-    color: #1b242a !important; /* Texte input */
-    border-radius: 10px !important; /* Coins */
-    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure */
-    backdrop-filter: blur(10px) !important; /* Effet */
-}
-
-input::placeholder {
-    color: #5d6a72 !important; /* Placeholder gris-bleu */
-}
-
-/* ==========================================================
-   TABLES — glass effet
-   ========================================================== */
-.table > thead {
-    background-color: rgba(255,255,255,0.32) !important; /* Entête tableau */
-}
-.table > tbody > tr:nth-child(odd) {
-    background-color: rgba(255,255,255,0.22) !important; /* Lignes impaires */
-}
-.table > tbody > tr:nth-child(even) {
-    background-color: rgba(255,255,255,0.18) !important; /* Lignes paires */
-}
-
-/* ==========================================================
-   NAVBAR — barre supérieure
-   ========================================================== */
-.navbar {
-    background: rgba(255,255,255,0.32) !important; /* TRANSPARENCE FIXÉE (plus lisible) */
-    border-bottom: 1px solid rgba(255,255,255,0.40) !important; /* Bordure basse */
-    backdrop-filter: blur(18px) !important; /* Effet glass */
-}
-
-.navbar a,
-.navbar span {
-    color: #1b242a !important; /* Texte navbar */
-}
-
-/* ==========================================================
-   DROPDOWN — menus déroulants
-   ========================================================== */
-.dropdown-menu {
-    background: rgba(255,255,255,0.30) !important; /* Fond du menu */
-    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure */
-    backdrop-filter: blur(14px) !important; /* Effet glass */
-}
-.dropdown-menu > li > a {
-    color: #1b242a !important; /* Texte éléments */
-}
-.dropdown-menu > li > a:hover {
-    background: rgba(255,255,255,0.18) !important; /* Survol option */
-}
-
-/* ======================================================
-   FIX Z-INDEX — Menus déroulants toujours AU-DESSUS
-   ====================================================== */
-.navbar,
-.navbar * {
-    z-index: 9999 !important; /* Toujours au-dessus */
-    position: relative !important; /* Positionnement */
-}
-
-.dropdown-menu {
-    z-index: 10000 !important; /* Encore plus haut */
-    position: absolute !important; /* S’affiche au-dessus */
-}
+/* ==========================================================================
+   PANNEAUX (partages, appareils)
+   ========================================================================== */
 
 .panel,
-.device,
-.folder,
-.card,
+.panel-default,
 .well {
-    z-index: 1 !important; /* Les panneaux doivent rester derrière */
-    position: relative !important;
-}
-/* ======================================================
-   FIX — DROPDOWN LISIBILITÉ PARFAITE (pas de transparence excessive)
-   ====================================================== */
-
-.dropdown-menu {
-    background: rgba(255,255,255,0.75) !important; /* Bonne opacité → lisible */
-    border: 1px solid rgba(255,255,255,0.60) !important; /* Bordure nette */
-    backdrop-filter: none !important; /* SUPPRESSION DU BLUR (cause principal du bug) */
-    -webkit-backdrop-filter: none !important; /* Compat Safari */
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important; /* Ombre propre */
+    background: var(--mt-surface);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius);
+    box-shadow: var(--mt-shadow);
+    backdrop-filter: blur(var(--mt-blur));
+    -webkit-backdrop-filter: blur(var(--mt-blur));
 }
 
-/* Texte lisible */
-.dropdown-menu > li > a {
-    color: #1b242a !important;
-    font-weight: 500 !important;
+.panel-default > .panel-heading,
+.panel > .panel-heading {
+    background: var(--mt-surface-raised);
+    border-bottom: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius) var(--mt-radius) 0 0;
+    color: #0d1724;
+    transition: background 0.18s ease;
 }
 
-/* Hover */
-.dropdown-menu > li > a:hover {
-    background: rgba(255,255,255,0.90) !important; /* Blanc soft → super lisible */
-    color: #000 !important;
+/* L'en-tete d'un partage ou d'un appareil est cliquable (repli / depli). */
+.panel > .panel-heading:hover { background: rgba(15, 30, 55, 0.10); }
+
+.panel-title      { color: #0d1724; }
+.panel-body       { color: var(--mt-text); }
+.panel-footer     { background: var(--mt-surface-raised); border-top: 1px solid var(--mt-border); }
+.panel-group .panel + .panel { margin-top: 12px; }
+
+/* ==========================================================================
+   BOUTONS — matrice complete : repos, survol, focus, actif, ouvert, desactive
+   ========================================================================== */
+
+.btn {
+    border-radius: var(--mt-radius-sm);
+    font-weight: 600;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
+
+.btn:active,
+.btn.active { box-shadow: none; transform: translateY(1px); }
+
+.btn:focus,
+.btn:focus-visible { outline-offset: 2px; }
+
+.btn[disabled],
+.btn.disabled {
+    opacity: 0.45;
+    box-shadow: none;
+}
+
+.btn-default,
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--mt-border-strong);
+    color: var(--mt-text);
+}
+.btn-default:hover,
+.btn-default:focus,
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background: #ffffff;
+    border-color: rgba(20, 40, 70, 0.38);
+    color: #0d1724;
+}
+.btn-default:active,
+.btn-default.active,
+.open > .dropdown-toggle.btn-default,
+.open > .dropdown-toggle.btn-default:hover,
+.open > .dropdown-toggle.btn-default:focus {
+    background: rgba(15, 30, 55, 0.10);
+    border-color: var(--mt-border-strong);
+    color: #0d1724;
+}
+.btn-default[disabled],
+.btn-default[disabled]:hover,
+.btn-secondary[disabled],
+.btn-secondary[disabled]:hover {
+    background: rgba(255, 255, 255, 0.60);
+    border-color: var(--mt-border);
+    color: var(--mt-text-dim);
+}
+
+.btn-primary {
+    background: var(--mt-accent);
+    border: 1px solid var(--mt-accent);
+    color: var(--mt-accent-ink);
+}
+.btn-primary:hover,
+.btn-primary:focus       { background: #1a5fa9; border-color: #1a5fa9; color: #fff; }
+.btn-primary:active,
+.btn-primary.active,
+.open > .dropdown-toggle.btn-primary { background: #164f8d; border-color: #164f8d; color: #fff; }
+
+.btn-success {
+    background: var(--mt-success);
+    border: 1px solid var(--mt-success);
+    color: #fff;
+}
+.btn-success:hover,
+.btn-success:focus,
+.open > .dropdown-toggle.btn-success { background: #197a51; border-color: #197a51; color: #fff; }
+
+.btn-warning {
+    background: var(--mt-warning);
+    border: 1px solid var(--mt-warning);
+    color: #fff;
+}
+.btn-warning:hover,
+.btn-warning:focus,
+.open > .dropdown-toggle.btn-warning { background: #9c6b0d; border-color: #9c6b0d; color: #fff; }
+
+.btn-danger {
+    background: var(--mt-danger);
+    border: 1px solid var(--mt-danger);
+    color: #fff;
+}
+.btn-danger:hover,
+.btn-danger:focus,
+.open > .dropdown-toggle.btn-danger { background: #a72e24; border-color: #a72e24; color: #fff; }
+
+/* ==========================================================================
+   FORMULAIRES
+   Les <option> d'un <select> natif sont peintes par le systeme : les redefinir
+   evite qu'une liste deroulante ne detonne avec le reste du theme.
+   ========================================================================== */
+
+.form-control,
+input[type="text"],
+input[type="number"],
+input[type="password"],
+select,
+textarea {
+    background: var(--mt-sunken);
+    border: 1px solid var(--mt-border-strong);
+    border-radius: var(--mt-radius-sm);
+    color: var(--mt-text);
+    box-shadow: none;
+}
+
+.form-control:focus,
+select:focus,
+textarea:focus {
+    background: #ffffff;
+    border-color: var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(31, 111, 196, 0.18);
+    color: #0d1724;
+}
+
+.form-control[disabled],
+.form-control[readonly],
+select[disabled],
+fieldset[disabled] .form-control {
+    background: rgba(15, 30, 55, 0.05);
+    color: var(--mt-text-dim);
+    cursor: not-allowed;
+}
+
+.form-control::placeholder { color: var(--mt-text-dim); }
+
+select option {
+    background: #ffffff;
+    color: var(--mt-text);
+}
+
+input[type="checkbox"],
+input[type="radio"] { accent-color: var(--mt-accent); }
+
+label,
+.control-label { color: var(--mt-text); }
+
+.input-group-addon {
+    background: var(--mt-surface-raised);
+    border: 1px solid var(--mt-border-strong);
+    color: var(--mt-text-muted);
+}
+
+.has-error .form-control    { border-color: var(--mt-danger); }
+.has-error .help-block,
+.has-error .control-label   { color: #a32c22; }
+.has-warning .form-control  { border-color: var(--mt-warning); }
+.has-warning .help-block,
+.has-warning .control-label { color: #8f620c; }
+
+/* ==========================================================================
+   TABLEAUX
+   ========================================================================== */
+
+.table > thead > tr > th {
+    border-bottom: 1px solid var(--mt-border-strong);
+    color: var(--mt-text-muted);
+    font-weight: 600;
+}
+
+.table > tbody > tr > td,
+.table > tbody > tr > th {
+    border-top: 1px solid rgba(20, 40, 70, 0.08);
+    color: var(--mt-text);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd),
+.table-striped > tbody > tr:nth-of-type(even) { background: transparent; }
+
+.table-striped > tbody > tr:nth-of-type(odd) { background: rgba(15, 30, 55, 0.035); }
+
+.table-hover > tbody > tr:hover { background: var(--mt-surface-raised); }
+
+/* ==========================================================================
+   ONGLETS
+   ========================================================================== */
+
+.nav-tabs { border-bottom: 1px solid var(--mt-border); }
+
+.nav-tabs > li > a {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--mt-radius-sm) var(--mt-radius-sm) 0 0;
+    color: var(--mt-text-muted);
+}
+.nav-tabs > li > a:hover {
+    background: var(--mt-surface-raised);
+    border-color: transparent;
+    color: var(--mt-text);
+}
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+    background: rgba(255, 255, 255, 0.90);
+    border: 1px solid var(--mt-border);
+    border-bottom-color: transparent;
+    color: #0d1724;
+}
+
+/* ==========================================================================
+   RETOURS UTILISATEUR — alertes, barres de progression, badges, journaux
+   ========================================================================== */
+
+.alert {
+    border-radius: var(--mt-radius-sm);
+    border-width: 1px;
+    backdrop-filter: blur(var(--mt-blur));
+    -webkit-backdrop-filter: blur(var(--mt-blur));
+}
+.alert-success { background: rgba(30, 143, 96, 0.12);  border-color: rgba(30, 143, 96, 0.35);  color: #14603f; }
+.alert-info    { background: rgba(58, 99, 168, 0.12);  border-color: rgba(58, 99, 168, 0.35);  color: #26406e; }
+.alert-warning { background: rgba(181, 125, 18, 0.14); border-color: rgba(181, 125, 18, 0.35); color: #74510b; }
+.alert-danger  { background: rgba(195, 56, 44, 0.12);  border-color: rgba(195, 56, 44, 0.35);  color: #8c261d; }
+
+.progress {
+    background: rgba(15, 30, 55, 0.10);
+    border-radius: 999px;
+    box-shadow: none;
+    height: 10px;
+}
+.progress-bar         { background: var(--mt-accent); box-shadow: none; }
+.progress-bar-success { background: var(--mt-success); }
+.progress-bar-warning { background: var(--mt-warning); }
+.progress-bar-danger  { background: var(--mt-danger); }
+
+.badge {
+    background: rgba(15, 30, 55, 0.10);
+    border: 1px solid var(--mt-border);
+    color: var(--mt-text);
+}
+
+/* Journaux et kit d'assistance : blocs de texte prefixes. */
+pre,
+code,
+.log-viewer {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--mt-border-strong);
+    border-radius: var(--mt-radius-sm);
+    color: #1c2836;
+}
+
+/* ==========================================================================
+   BARRE DE DEFILEMENT
+   ========================================================================== */
+
+::-webkit-scrollbar        { width: 12px; height: 12px; }
+::-webkit-scrollbar-track  { background: rgba(15, 30, 55, 0.06); }
+::-webkit-scrollbar-thumb  {
+    background: rgba(15, 30, 55, 0.28);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(15, 30, 55, 0.42); background-clip: content-box; }

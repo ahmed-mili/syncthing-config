@@ -42,7 +42,9 @@ l'identité de la machine ni aux dossiers déjà synchronisés.
 | `payload/gui/mountain theme/` | Thème sombre (appliqué par défaut). |
 | `payload/gui/mountain light/` | Thème clair. |
 
-Les deux thèmes restent sélectionnables dans **Actions > Settings > GUI Theme**.
+Les deux thèmes restent sélectionnables dans **Actions > Configuration > Interface graphique**.
+Syncthing sert toujours le thème actif à la même adresse (`assets/css/theme.css`) : après un
+changement de thème, faites **Ctrl+F5** dans le navigateur, sinon l'ancien reste en cache.
 
 ## Vie privée
 

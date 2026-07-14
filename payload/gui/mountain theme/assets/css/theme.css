@@ -1,214 +1,546 @@
-/* ======================================================
-   THEME : mountain theme — MontagneNuit Edition (Transparent Buttons)
-   Version finale stabilisée (aucun rectangle résiduel)
-   ====================================================== */
+/* ==========================================================================
+   mountain theme — variante sombre (MontagneNuit)
+   Theme personnalise pour l'interface web de Syncthing.
 
-/* === FOND GLOBAL === */
+   Bootstrap 3 est un theme CLAIR : tout etat non redefini ici (.open, .active,
+   :focus, [disabled], .table-striped, option, .popover...) retombe sur un fond
+   clair et devient illisible sur fond sombre. Ce fichier couvre donc la matrice
+   d'etats, pas seulement les composants au repos.
+
+   theme.css est charge apres bootstrap.css : une specificite egale suffit a
+   gagner la cascade, d'ou l'absence de !important.
+   ========================================================================== */
+
+:root {
+    /* Surfaces */
+    --mt-surface:        rgba(12, 19, 33, 0.62);   /* cartes, panneaux (verre)   */
+    --mt-surface-raised: rgba(255, 255, 255, 0.06); /* en-tetes, lignes survolees */
+    --mt-overlay:        rgba(10, 16, 29, 0.94);   /* menus, modales, popovers    */
+    --mt-sunken:         rgba(255, 255, 255, 0.07); /* champs de saisie            */
+
+    /* Traits */
+    --mt-border:        rgba(255, 255, 255, 0.12);
+    --mt-border-strong: rgba(255, 255, 255, 0.22);
+
+    /* Texte */
+    --mt-text:       #e9eff7;
+    --mt-text-muted: #a7b5c6;
+    --mt-text-dim:   #7d8ca0;
+
+    /* Accent et etats semantiques */
+    --mt-accent:      #5aa9f2;
+    --mt-accent-ink:  #08101d;   /* texte pose sur l'accent */
+    --mt-success:     #3fb27f;
+    --mt-warning:     #d9a441;
+    --mt-danger:      #e0574b;
+    --mt-info:        #6d8fd6;
+
+    /* Geometrie et profondeur */
+    --mt-radius:    14px;
+    --mt-radius-sm: 10px;
+    --mt-blur:      18px;
+    --mt-shadow:       0 10px 30px rgba(0, 0, 0, 0.35);
+    --mt-shadow-float: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+/* ==========================================================================
+   FOND ET TYPOGRAPHIE
+   Un voile degrade est pose sur la photo : sans lui, le texte clair devient
+   illisible sur les zones claires du ciel.
+   ========================================================================== */
+
+/* L'attachement est declare couche par couche : dans le raccourci `background`,
+   le mot-cle `fixed` ne s'appliquerait qu'a la derniere couche. Le degrade
+   resterait en `scroll`, dimensionne a la hauteur du contenu, et s'arreterait
+   net en bas de page — la photo reapparaissait alors sans son voile. */
 body {
-    background: url("../img/MontagneNuit.jpg") no-repeat center center fixed !important;
-    background-size: cover !important;
-    color: #cdd7e2 !important;
-    font-family: "Neo Sans Std", sans-serif !important;
+    background-image:
+        linear-gradient(180deg, rgba(4, 8, 16, 0.55), rgba(4, 8, 16, 0.78)),
+        url("../img/MontagneNuit.jpg");
+    background-repeat: no-repeat, no-repeat;
+    background-position: center center, center center;
+    background-attachment: fixed, fixed;
+    background-size: cover, cover;
+    color: var(--mt-text);
 }
 
-/* === PANNEAUX === */
-.panel,
-.device,
-.folder,
-.card,
-.well {
-    border-radius: 14px !important;
-    background: rgba(5, 10, 20, 0.78) !important;
-    border: none !important; /* 🔥 supprimé totalement */
-    outline: none !important;
-    box-shadow: none !important;
-    backdrop-filter: blur(12px) !important;
+h1, h2, h3, h4, h5 { color: #f2f6fb; }
+
+a         { color: var(--mt-accent); }
+a:hover,
+a:focus   { color: #8cc4f8; }
+
+hr        { border-top-color: var(--mt-border); }
+small,
+.text-muted,
+.help-block { color: var(--mt-text-muted); }
+
+::selection { background: rgba(90, 169, 242, 0.35); color: #fff; }
+
+:focus-visible {
+    outline: 2px solid var(--mt-accent);
+    outline-offset: 2px;
 }
 
-/* === EN-TÊTES === */
-.panel-heading {
-    background: rgba(10, 20, 35, 0.92) !important;
-    color: #dce4ee !important;
-    border-radius: 14px 14px 0 0 !important;
-    border: none !important; /* 🔥 coupe toutes bordures invisibles */
+/* ==========================================================================
+   BARRE DE NAVIGATION
+   ========================================================================== */
+
+/* Le flou est porte par un pseudo-element, jamais par la barre elle-meme : un
+   backdrop-filter clippe la peinture ET le hit-testing de ses descendants a sa
+   propre boite. Pose sur .navbar-default, il amputait le menu deroulant de
+   toutes les entrees depassant sous la barre — invisibles et non cliquables.
+   Le menu n'est pas un descendant du pseudo-element : il echappe au clip. */
+.navbar-default {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--mt-border);
 }
 
-/* === TITRES === */
-h1, h2, h3, h4 {
-    color: #e3eaf2 !important;
-    text-shadow: 0 0 6px rgba(0,0,0,0.7) !important;
+.navbar-default::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 11, 21, 0.88);
+    backdrop-filter: blur(var(--mt-blur));
+    -webkit-backdrop-filter: blur(var(--mt-blur));
 }
 
-/* ======================================================
-   MODALES
-   ====================================================== */
+/* Le pseudo-element est positionne : sans cela il recouvrirait le contenu de
+   la barre, qui n'est pas positionne. */
+.navbar-default > .container { position: relative; }
+
+/* Bootstrap force les coins hauts du menu a 0 pour le coller sous la barre.
+   Le menu est ici une carte flottante : coins arrondis et leger detachement. */
+.navbar-nav > li > .dropdown-menu {
+    border-radius: var(--mt-radius-sm);
+    margin-top: 6px;
+}
+
+.navbar-default .navbar-brand,
+.navbar-default .navbar-text,
+.navbar-default .navbar-nav > li > a,
+.navbar-default .navbar-link { color: var(--mt-text); }
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+    color: #fff;
+    background: var(--mt-surface-raised);
+}
+
+/* L'etat ouvert : Bootstrap y met #e7e7e7, un fond clair sur lequel le texte
+   clair du theme disparait (contraste 1,12). C'est la cause du bouton Actions
+   illisible des qu'on deroule le menu. */
+.navbar-default .navbar-nav > .open > a,
+.navbar-default .navbar-nav > .open > a:hover,
+.navbar-default .navbar-nav > .open > a:focus,
+.nav .open > a,
+.nav .open > a:hover,
+.nav .open > a:focus {
+    background: var(--mt-surface-raised);
+    border-color: var(--mt-border);
+    color: #fff;
+}
+
+.navbar-default .navbar-toggle { border-color: var(--mt-border); }
+.navbar-default .navbar-toggle:hover,
+.navbar-default .navbar-toggle:focus { background: var(--mt-surface-raised); }
+.navbar-default .navbar-toggle .icon-bar { background: var(--mt-text); }
+
+/* ==========================================================================
+   SURFACES FLOTTANTES — menus, modales, popovers, infobulles
+   Elles doivent masquer le contenu qui passe dessous. Une translucidite seule
+   laisse fantomer le texte de la page (c'etait le cas a 0,95 d'alpha) : le flou
+   d'arriere-plan detruit cette lisibilite residuelle et donne l'effet verre.
+   ========================================================================== */
+
+.dropdown-menu {
+    background: var(--mt-overlay);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius-sm);
+    box-shadow: var(--mt-shadow-float);
+    backdrop-filter: blur(var(--mt-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--mt-blur)) saturate(120%);
+    padding: 6px;
+}
+
+.dropdown-menu > li > a {
+    color: var(--mt-text);
+    border-radius: 8px;
+    padding: 7px 12px;
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+    background: var(--mt-surface-raised);
+    color: #fff;
+}
+
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+    background: rgba(90, 169, 242, 0.22);
+    color: #fff;
+}
+
+.dropdown-menu > .disabled > a,
+.dropdown-menu > .disabled > a:hover,
+.dropdown-menu > .disabled > a:focus {
+    color: var(--mt-text-dim);
+    background: transparent;
+}
+
+.dropdown-menu .divider {
+    background: var(--mt-border);
+    margin: 6px 4px;
+}
+
+.dropdown-header { color: var(--mt-text-dim); }
+
 .modal-content {
-    background: rgba(8, 15, 30, 0.92) !important;
-    border-radius: 14px !important;
-    border: none !important;
+    background: var(--mt-overlay);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius);
+    box-shadow: var(--mt-shadow-float);
+    backdrop-filter: blur(var(--mt-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--mt-blur)) saturate(120%);
 }
+
 .modal-header {
-    background: rgba(10, 20, 35, 0.95) !important;
-    border-bottom: 1px solid rgba(120,140,160,0.22) !important;
-    color: #dce4ee !important;
-}
-.modal-footer {
-    background: rgba(10, 20, 35, 0.85) !important;
-    border-top: 1px solid rgba(120,140,160,0.18) !important;
+    border-bottom: 1px solid var(--mt-border);
+    color: #f2f6fb;
 }
 
-/* Onglets */
-.nav-tabs > li > a {
-    background: rgba(20, 28, 45, 0.85) !important;
-    color: #cdd7e2 !important;
-    border-radius: 10px 10px 0 0 !important;
-    border: 1px solid rgba(120,140,160,0.22) !important;
-}
-.nav-tabs > li.active > a {
-    background: rgba(35, 45, 65, 0.95) !important;
-    color: #e3ebf5 !important;
+.modal-footer  { border-top: 1px solid var(--mt-border); }
+.modal-title   { color: #f2f6fb; }
+
+.modal-backdrop,
+.modal-backdrop.in {
+    background: #030710;
+    opacity: 0.6;
 }
 
-/* ======================================================
-   BOUTONS — Transparence + bleu-gris (aucun blanc)
-   ====================================================== */
+/* Bootstrap peint les popovers en blanc : illisible ici sans redefinition. */
+.popover {
+    background: var(--mt-overlay);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius-sm);
+    box-shadow: var(--mt-shadow-float);
+    color: var(--mt-text);
+}
+.popover-title {
+    background: var(--mt-surface-raised);
+    border-bottom: 1px solid var(--mt-border);
+    color: var(--mt-text);
+}
+.popover.top    > .arrow::after { border-top-color: var(--mt-overlay); }
+.popover.bottom > .arrow::after { border-bottom-color: var(--mt-overlay); }
+.popover.left   > .arrow::after { border-left-color: var(--mt-overlay); }
+.popover.right  > .arrow::after { border-right-color: var(--mt-overlay); }
 
-.btn,
-button,
-input[type="button"],
-input[type="submit"] {
-    background: rgba(120,140,170,0.32) !important;
-    color: #e6eef8 !important;
-    border-radius: 12px !important;
-    border: 1px solid rgba(140,160,190,0.32) !important;
-    backdrop-filter: blur(6px) !important;
-    font-weight: 600 !important;
-    padding: 6px 14px !important;
-    transition: 0.25s ease !important;
+.tooltip-inner {
+    background: var(--mt-overlay);
+    border: 1px solid var(--mt-border);
+    border-radius: 8px;
+    color: var(--mt-text);
+    box-shadow: var(--mt-shadow);
+}
+.tooltip.top    .tooltip-arrow { border-top-color: var(--mt-overlay); }
+.tooltip.bottom .tooltip-arrow { border-bottom-color: var(--mt-overlay); }
+.tooltip.left   .tooltip-arrow { border-left-color: var(--mt-overlay); }
+.tooltip.right  .tooltip-arrow { border-right-color: var(--mt-overlay); }
+
+/* ==========================================================================
+   PANNEAUX (partages, appareils)
+   ========================================================================== */
+
+.panel,
+.panel-default,
+.well {
+    background: var(--mt-surface);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius);
+    box-shadow: var(--mt-shadow);
+    backdrop-filter: blur(var(--mt-blur));
+    -webkit-backdrop-filter: blur(var(--mt-blur));
 }
 
-.btn:hover,
-button:hover {
-    background: rgba(150,170,200,0.45) !important;
-    transform: translateY(-1px);
-    color: #ffffff !important;
+.panel-default > .panel-heading,
+.panel > .panel-heading {
+    background: var(--mt-surface-raised);
+    border-bottom: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius) var(--mt-radius) 0 0;
+    color: #f2f6fb;
+    transition: background 0.18s ease;
 }
 
-/* Boutons désactivés */
-.btn:disabled,
-button:disabled {
-    background: rgba(70,85,110,0.32) !important;
-    color: rgba(200,210,225,0.55) !important;
-    border: 1px solid rgba(90,110,140,0.25) !important;
+/* L'en-tete d'un partage ou d'un appareil est cliquable (repli / depli). */
+.panel > .panel-heading:hover { background: rgba(255, 255, 255, 0.10); }
+
+.panel-title      { color: #f2f6fb; }
+.panel-body       { color: var(--mt-text); }
+.panel-footer     { background: var(--mt-surface-raised); border-top: 1px solid var(--mt-border); }
+.panel-group .panel + .panel { margin-top: 12px; }
+
+/* ==========================================================================
+   BOUTONS — matrice complete : repos, survol, focus, actif, ouvert, desactive
+   ========================================================================== */
+
+.btn {
+    border-radius: var(--mt-radius-sm);
+    font-weight: 600;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
-/* Danger */
+.btn:active,
+.btn.active { box-shadow: none; transform: translateY(1px); }
+
+.btn:focus,
+.btn:focus-visible { outline-offset: 2px; }
+
+.btn[disabled],
+.btn.disabled {
+    opacity: 0.45;
+    box-shadow: none;
+}
+
+/* Neutre : verre. Aussi utilise par le bouton d'un menu deroulant ouvert. */
+.btn-default,
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid var(--mt-border-strong);
+    color: var(--mt-text);
+}
+.btn-default:hover,
+.btn-default:focus,
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background: rgba(255, 255, 255, 0.17);
+    border-color: rgba(255, 255, 255, 0.30);
+    color: #fff;
+}
+.btn-default:active,
+.btn-default.active,
+.open > .dropdown-toggle.btn-default,
+.open > .dropdown-toggle.btn-default:hover,
+.open > .dropdown-toggle.btn-default:focus {
+    background: rgba(255, 255, 255, 0.20);
+    border-color: var(--mt-border-strong);
+    color: #fff;
+}
+.btn-default[disabled],
+.btn-default[disabled]:hover,
+.btn-secondary[disabled],
+.btn-secondary[disabled]:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--mt-border);
+    color: var(--mt-text-dim);
+}
+
+/* Actions colorees : un fond teinte, jamais le degrade clair de Bootstrap. */
+.btn-primary {
+    background: var(--mt-accent);
+    border: 1px solid var(--mt-accent);
+    color: var(--mt-accent-ink);
+}
+.btn-primary:hover,
+.btn-primary:focus       { background: #7bbcf7; border-color: #7bbcf7; color: var(--mt-accent-ink); }
+.btn-primary:active,
+.btn-primary.active,
+.open > .dropdown-toggle.btn-primary { background: #4796dd; border-color: #4796dd; color: var(--mt-accent-ink); }
+
+.btn-success {
+    background: var(--mt-success);
+    border: 1px solid var(--mt-success);
+    color: #06170f;
+}
+.btn-success:hover,
+.btn-success:focus,
+.open > .dropdown-toggle.btn-success { background: #4cc48e; border-color: #4cc48e; color: #06170f; }
+
+.btn-warning {
+    background: var(--mt-warning);
+    border: 1px solid var(--mt-warning);
+    color: #1b1301;
+}
+.btn-warning:hover,
+.btn-warning:focus,
+.open > .dropdown-toggle.btn-warning { background: #e8b757; border-color: #e8b757; color: #1b1301; }
+
 .btn-danger {
-    background: rgba(170,45,45,0.75) !important;
-    color: #fff !important;
+    background: var(--mt-danger);
+    border: 1px solid var(--mt-danger);
+    color: #fff;
 }
-.btn-danger:hover {
-    background: rgba(150,40,40,0.85) !important;
-}
+.btn-danger:hover,
+.btn-danger:focus,
+.open > .dropdown-toggle.btn-danger { background: #ea6a5f; border-color: #ea6a5f; color: #fff; }
 
-/* ======================================================
-   INPUTS / SELECT
-   ====================================================== */
-input,
+/* ==========================================================================
+   FORMULAIRES
+   Les <option> d'un <select> natif sont peintes par le systeme : sans cette
+   regle, la liste deroulante s'ouvre en blanc sur un theme sombre.
+   ========================================================================== */
+
+.form-control,
+input[type="text"],
+input[type="number"],
+input[type="password"],
 select,
 textarea {
-    background-color: rgba(15, 22, 35, 0.85) !important;
-    color: #dde5ef !important;
-    border-radius: 10px !important;
-    border: 1px solid rgba(120,140,160,0.35) !important;
+    background: var(--mt-sunken);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius-sm);
+    color: var(--mt-text);
+    box-shadow: none;
 }
 
-input::placeholder {
-    color: #9aa7b6 !important;
+.form-control:focus,
+select:focus,
+textarea:focus {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(90, 169, 242, 0.20);
+    color: #fff;
 }
 
-input[disabled],
-select[disabled] {
-    background: rgba(25, 32, 45, 0.60) !important;
-    color: #9aa7b6 !important;
+.form-control[disabled],
+.form-control[readonly],
+select[disabled],
+fieldset[disabled] .form-control {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--mt-text-dim);
+    cursor: not-allowed;
 }
 
-/* ======================================================
+.form-control::placeholder { color: var(--mt-text-dim); }
+
+select option {
+    background: #0d1524;
+    color: var(--mt-text);
+}
+
+input[type="checkbox"],
+input[type="radio"] { accent-color: var(--mt-accent); }
+
+label,
+.control-label { color: var(--mt-text); }
+
+.input-group-addon {
+    background: var(--mt-surface-raised);
+    border: 1px solid var(--mt-border);
+    color: var(--mt-text-muted);
+}
+
+.has-error .form-control    { border-color: var(--mt-danger); }
+.has-error .help-block,
+.has-error .control-label   { color: #f08a80; }
+.has-warning .form-control  { border-color: var(--mt-warning); }
+.has-warning .help-block,
+.has-warning .control-label { color: #e6bd6f; }
+
+/* ==========================================================================
    TABLEAUX
-   ====================================================== */
-.table > thead {
-    background-color: rgba(10, 20, 35, 0.95) !important;
-}
-.table > tbody > tr:nth-child(odd) {
-    background-color: rgba(18, 25, 40, 0.85) !important;
-}
-.table > tbody > tr:nth-child(even) {
-    background-color: rgba(25, 32, 48, 0.85) !important;
+   .table-striped peint une ligne sur deux en #f9f9f9 : a neutraliser.
+   ========================================================================== */
+
+.table > thead > tr > th {
+    border-bottom: 1px solid var(--mt-border-strong);
+    color: var(--mt-text-muted);
+    font-weight: 600;
 }
 
-/* ======================================================
-   NAVBAR
-   ====================================================== */
-.navbar {
-    background: rgba(5, 10, 20, 0.90) !important;
-    border-bottom: 1px solid rgba(120,140,160,0.25) !important;
-}
-.navbar a,
-.navbar span {
-    color: #d4dce6 !important;
+.table > tbody > tr > td,
+.table > tbody > tr > th {
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    color: var(--mt-text);
 }
 
-/* ======================================================
-   DROPDOWN
-   ====================================================== */
-.dropdown-menu {
-    background: rgba(10,20,35,0.95) !important;
-    border: 1px solid rgba(120,140,160,0.25) !important;
+.table-striped > tbody > tr:nth-of-type(odd),
+.table-striped > tbody > tr:nth-of-type(even) { background: transparent; }
+
+.table-striped > tbody > tr:nth-of-type(odd) { background: rgba(255, 255, 255, 0.03); }
+
+.table-hover > tbody > tr:hover { background: var(--mt-surface-raised); }
+
+/* ==========================================================================
+   ONGLETS
+   ========================================================================== */
+
+.nav-tabs { border-bottom: 1px solid var(--mt-border); }
+
+.nav-tabs > li > a {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--mt-radius-sm) var(--mt-radius-sm) 0 0;
+    color: var(--mt-text-muted);
 }
-.dropdown-menu > li > a {
-    color: #d4dce6 !important;
+.nav-tabs > li > a:hover {
+    background: var(--mt-surface-raised);
+    border-color: transparent;
+    color: var(--mt-text);
 }
-.dropdown-menu > li > a:hover {
-    background: rgba(255,255,255,0.08) !important;
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+    background: var(--mt-surface-raised);
+    border: 1px solid var(--mt-border);
+    border-bottom-color: transparent;
+    color: #fff;
 }
 
-/* ======================================================
-   SUPPRESSION DU RECTANGLE AUTOUR DES FOLDERS
-   ====================================================== */
+/* ==========================================================================
+   RETOURS UTILISATEUR — alertes, barres de progression, badges, journaux
+   ========================================================================== */
 
-.folder,
-.folder:hover,
-.folder:active,
-.folder:focus,
-.device,
-.device:hover,
-.device:active,
-.device:focus,
-.panel-default,
-.panel-default:hover,
-.panel-default:focus,
-.panel-default:active {
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
+.alert {
+    border-radius: var(--mt-radius-sm);
+    border-width: 1px;
+    backdrop-filter: blur(var(--mt-blur));
+    -webkit-backdrop-filter: blur(var(--mt-blur));
+}
+.alert-success { background: rgba(63, 178, 127, 0.16); border-color: rgba(63, 178, 127, 0.40); color: #a6e6c8; }
+.alert-info    { background: rgba(109, 143, 214, 0.16); border-color: rgba(109, 143, 214, 0.40); color: #b9caf1; }
+.alert-warning { background: rgba(217, 164, 65, 0.16);  border-color: rgba(217, 164, 65, 0.40);  color: #f0d29a; }
+.alert-danger  { background: rgba(224, 87, 75, 0.16);   border-color: rgba(224, 87, 75, 0.40);   color: #f5b3ac; }
+
+.progress {
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 999px;
+    box-shadow: none;
+    height: 10px;
+}
+.progress-bar         { background: var(--mt-accent); box-shadow: none; }
+.progress-bar-success { background: var(--mt-success); }
+.progress-bar-warning { background: var(--mt-warning); }
+.progress-bar-danger  { background: var(--mt-danger); }
+
+.badge {
+    background: var(--mt-surface-raised);
+    border: 1px solid var(--mt-border);
+    color: var(--mt-text);
 }
 
-.folder .panel-heading,
-.device .panel-heading,
-.panel-default .panel-heading {
-    background: rgba(40, 55, 75, 0.55) !important;
-    border-radius: 14px !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.35) !important;
+/* Journaux et kit d'assistance : blocs de texte prefixes, blancs par defaut. */
+pre,
+code,
+.log-viewer {
+    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid var(--mt-border);
+    border-radius: var(--mt-radius-sm);
+    color: #cfe0f0;
 }
 
-.folder:hover .panel-heading,
-.device:hover .panel-heading,
-.panel-default:hover .panel-heading {
-    background: rgba(60, 80, 110, 0.60) !important;
-    border: 1px solid rgba(255,255,255,0.16) !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.40) !important;
+/* ==========================================================================
+   BARRE DE DEFILEMENT
+   ========================================================================== */
+
+::-webkit-scrollbar        { width: 12px; height: 12px; }
+::-webkit-scrollbar-track  { background: rgba(0, 0, 0, 0.25); }
+::-webkit-scrollbar-thumb  {
+    background: rgba(255, 255, 255, 0.18);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
 }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.30); background-clip: content-box; }
