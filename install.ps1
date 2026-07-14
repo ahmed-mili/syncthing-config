@@ -81,7 +81,7 @@ try {
 
     if ($running.Count -gt 0) {
         Write-Step "Arret de l'instance Syncthing en cours..."
-        $running | ForEach-Object { try { $_.Kill(); $_.WaitForExit(5000) } catch {} }
+        $running | ForEach-Object { try { $_.Kill(); [void]$_.WaitForExit(5000) } catch {} }
     }
 
     # --- Binaire officiel + verification SHA-256 ------------------------------
