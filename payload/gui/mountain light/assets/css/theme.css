@@ -1,0 +1,245 @@
+/* ==========================================================
+   THEME : mountain light — MontagneJour (LIGHT SOFT)
+   ========================================================== */
+
+/* === BACKGROUND GLOBAL === */
+body {
+    background: url("../img/MontagneJour.jpg") no-repeat center center fixed !important; /* Image de fond */
+    background-size: cover !important; /* L’image couvre l’écran */
+    color: #242c33 !important; /* Couleur du texte général */
+    font-family: "Neo Sans Std", sans-serif !important; /* Police */
+}
+
+/* ==========================================================
+   PANNEAUX — conteneurs principaux
+   ========================================================== */
+.panel,           /* Panneaux standard */
+.device,          /* Blocs appareils */
+.folder,          /* Blocs dossiers */
+.card,            /* Blocs cartes */
+.well,            /* Ancienne classe Bootstrap */
+.panel-default {  /* Panneaux par défaut */
+    background: rgba(255, 255, 255, 0.20) !important; /* Transparence du panneau */
+    border-radius: 14px !important; /* Coins arrondis */
+    border: 1px solid rgba(255,255,255,0.35) !important; /* Bordure claire */
+    backdrop-filter: blur(18px) !important; /* Effet glass */
+    -webkit-backdrop-filter: blur(18px) !important; /* Effet glass Safari */
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12) !important; /* Ombre douce */
+}
+
+/* Suppression des rectangles autour des blocs Syncthing */
+.folder,
+.folder:hover,
+.folder:focus,
+.device,
+.device:hover,
+.device:focus,
+.panel-default,
+.panel-default:hover,
+.panel-default:focus {
+    background: transparent !important; /* On retire les parasites */
+    border: none !important; /* Supprime les bordures */
+    box-shadow: none !important; /* Supprime l’ombre */
+}
+
+/* Le vrai panneau glass (barre gris/blanc derrière le dossier) */
+.folder .panel-heading,
+.device .panel-heading,
+.panel-default .panel-heading {
+    background: rgba(255,255,255,0.22) !important; /* Transparence contrôlée */
+    border-radius: 14px !important; /* Coins arrondis */
+    border: 1px solid rgba(255,255,255,0.35) !important; /* Bordure */
+    backdrop-filter: blur(18px) !important; /* Effet glass */
+    -webkit-backdrop-filter: blur(18px) !important; /* Safari */
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important; /* Ombre */
+}
+
+/* Hover propre des dossiers */
+.folder:hover .panel-heading,
+.device:hover .panel-heading,
+.panel-default:hover .panel-heading {
+    background: rgba(255,255,255,0.28) !important; /* Légèrement plus clair */
+    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure plus visible */
+    box-shadow: 0 6px 16px rgba(0,0,0,0.20) !important; /* Ombre accentuée */
+}
+
+/* ==========================================================
+   MODALES — aucune zone blanche
+   ========================================================== */
+.modal-content {
+    background: rgba(255,255,255,0.28) !important; /* Fond glass */
+    border-radius: 16px !important; /* Coins arrondis */
+    border: 1px solid rgba(255,255,255,0.45) !important; /* Bordure */
+    backdrop-filter: blur(22px) !important; /* Effet glass */
+}
+
+.modal-header {
+    background: rgba(255,255,255,0.22) !important; /* Fond header */
+    border-bottom: 1px solid rgba(255,255,255,0.40) !important; /* Bordure basse */
+}
+
+.modal-footer {
+    background: rgba(255,255,255,0.20) !important; /* Fond footer */
+    border-top: 1px solid rgba(255,255,255,0.35) !important; /* Bordure haute */
+}
+
+/* Onglets (Général / Interface / Connexions / etc.) */
+.nav-tabs > li > a {
+    background: rgba(255,255,255,0.22) !important; /* Fond des onglets */
+    color: #273038 !important; /* Texte */
+    border-radius: 10px 10px 0 0 !important; /* Coins supérieurs */
+    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure */
+}
+
+.nav-tabs > li.active > a {
+    background: rgba(255,255,255,0.30) !important; /* Onglet actif */
+    color: #000 !important; /* Texte noir */
+    border-bottom-color: transparent !important; /* Pas de bordure basse */
+}
+
+/* ==========================================================
+   BOUTONS — version Light Soft
+   ========================================================== */
+.btn,
+button,
+input[type="button"],
+input[type="submit"] {
+    background: rgba(255,255,255,0.32) !important; /* TRANSPARENCE FIXÉE (moins pâle qu’avant) */
+    color: #1b242a !important; /* Texte */
+    border-radius: 12px !important; /* Coins */
+    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure */
+    backdrop-filter: blur(8px) !important; /* Effet glass */
+    font-weight: 600 !important; /* Texte bold */
+    padding: 6px 14px !important; /* Taille */
+    transition: 0.25s ease !important; /* Animation */
+}
+
+/* Hover sur les boutons */
+.btn:hover,
+button:hover {
+    background: rgba(255,255,255,0.40) !important; /* Plus clair */
+    transform: translateY(-1px); /* Effet flottant */
+    color: #000 !important; /* Texte noir */
+}
+
+/* Boutons désactivés */
+.btn:disabled,
+button:disabled {
+    background: rgba(255,255,255,0.22) !important; /* Fond atténué */
+    color: rgba(0,0,0,0.35) !important; /* Texte grisé */
+    border: 1px solid rgba(255,255,255,0.25) !important; /* Bordure soft */
+}
+
+/* Bouton rouge Danger */
+.btn-danger {
+    background: rgba(240,70,70,0.75) !important; /* Rouge opaque */
+    color: #fff !important; /* Texte blanc */
+}
+.btn-danger:hover {
+    background: rgba(220,50,50,0.85) !important; /* Rouge plus sombre */
+}
+
+/* ==========================================================
+   INPUTS / SELECT
+   ========================================================== */
+input,
+select,
+textarea {
+    background: rgba(255,255,255,0.32) !important; /* Fond input glass */
+    color: #1b242a !important; /* Texte input */
+    border-radius: 10px !important; /* Coins */
+    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure */
+    backdrop-filter: blur(10px) !important; /* Effet */
+}
+
+input::placeholder {
+    color: #5d6a72 !important; /* Placeholder gris-bleu */
+}
+
+/* ==========================================================
+   TABLES — glass effet
+   ========================================================== */
+.table > thead {
+    background-color: rgba(255,255,255,0.32) !important; /* Entête tableau */
+}
+.table > tbody > tr:nth-child(odd) {
+    background-color: rgba(255,255,255,0.22) !important; /* Lignes impaires */
+}
+.table > tbody > tr:nth-child(even) {
+    background-color: rgba(255,255,255,0.18) !important; /* Lignes paires */
+}
+
+/* ==========================================================
+   NAVBAR — barre supérieure
+   ========================================================== */
+.navbar {
+    background: rgba(255,255,255,0.32) !important; /* TRANSPARENCE FIXÉE (plus lisible) */
+    border-bottom: 1px solid rgba(255,255,255,0.40) !important; /* Bordure basse */
+    backdrop-filter: blur(18px) !important; /* Effet glass */
+}
+
+.navbar a,
+.navbar span {
+    color: #1b242a !important; /* Texte navbar */
+}
+
+/* ==========================================================
+   DROPDOWN — menus déroulants
+   ========================================================== */
+.dropdown-menu {
+    background: rgba(255,255,255,0.30) !important; /* Fond du menu */
+    border: 1px solid rgba(255,255,255,0.40) !important; /* Bordure */
+    backdrop-filter: blur(14px) !important; /* Effet glass */
+}
+.dropdown-menu > li > a {
+    color: #1b242a !important; /* Texte éléments */
+}
+.dropdown-menu > li > a:hover {
+    background: rgba(255,255,255,0.18) !important; /* Survol option */
+}
+
+/* ======================================================
+   FIX Z-INDEX — Menus déroulants toujours AU-DESSUS
+   ====================================================== */
+.navbar,
+.navbar * {
+    z-index: 9999 !important; /* Toujours au-dessus */
+    position: relative !important; /* Positionnement */
+}
+
+.dropdown-menu {
+    z-index: 10000 !important; /* Encore plus haut */
+    position: absolute !important; /* S’affiche au-dessus */
+}
+
+.panel,
+.device,
+.folder,
+.card,
+.well {
+    z-index: 1 !important; /* Les panneaux doivent rester derrière */
+    position: relative !important;
+}
+/* ======================================================
+   FIX — DROPDOWN LISIBILITÉ PARFAITE (pas de transparence excessive)
+   ====================================================== */
+
+.dropdown-menu {
+    background: rgba(255,255,255,0.75) !important; /* Bonne opacité → lisible */
+    border: 1px solid rgba(255,255,255,0.60) !important; /* Bordure nette */
+    backdrop-filter: none !important; /* SUPPRESSION DU BLUR (cause principal du bug) */
+    -webkit-backdrop-filter: none !important; /* Compat Safari */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important; /* Ombre propre */
+}
+
+/* Texte lisible */
+.dropdown-menu > li > a {
+    color: #1b242a !important;
+    font-weight: 500 !important;
+}
+
+/* Hover */
+.dropdown-menu > li > a:hover {
+    background: rgba(255,255,255,0.90) !important; /* Blanc soft → super lisible */
+    color: #000 !important;
+}

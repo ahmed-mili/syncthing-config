@@ -1,0 +1,214 @@
+/* ======================================================
+   THEME : mountain theme — MontagneNuit Edition (Transparent Buttons)
+   Version finale stabilisée (aucun rectangle résiduel)
+   ====================================================== */
+
+/* === FOND GLOBAL === */
+body {
+    background: url("../img/MontagneNuit.jpg") no-repeat center center fixed !important;
+    background-size: cover !important;
+    color: #cdd7e2 !important;
+    font-family: "Neo Sans Std", sans-serif !important;
+}
+
+/* === PANNEAUX === */
+.panel,
+.device,
+.folder,
+.card,
+.well {
+    border-radius: 14px !important;
+    background: rgba(5, 10, 20, 0.78) !important;
+    border: none !important; /* 🔥 supprimé totalement */
+    outline: none !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(12px) !important;
+}
+
+/* === EN-TÊTES === */
+.panel-heading {
+    background: rgba(10, 20, 35, 0.92) !important;
+    color: #dce4ee !important;
+    border-radius: 14px 14px 0 0 !important;
+    border: none !important; /* 🔥 coupe toutes bordures invisibles */
+}
+
+/* === TITRES === */
+h1, h2, h3, h4 {
+    color: #e3eaf2 !important;
+    text-shadow: 0 0 6px rgba(0,0,0,0.7) !important;
+}
+
+/* ======================================================
+   MODALES
+   ====================================================== */
+.modal-content {
+    background: rgba(8, 15, 30, 0.92) !important;
+    border-radius: 14px !important;
+    border: none !important;
+}
+.modal-header {
+    background: rgba(10, 20, 35, 0.95) !important;
+    border-bottom: 1px solid rgba(120,140,160,0.22) !important;
+    color: #dce4ee !important;
+}
+.modal-footer {
+    background: rgba(10, 20, 35, 0.85) !important;
+    border-top: 1px solid rgba(120,140,160,0.18) !important;
+}
+
+/* Onglets */
+.nav-tabs > li > a {
+    background: rgba(20, 28, 45, 0.85) !important;
+    color: #cdd7e2 !important;
+    border-radius: 10px 10px 0 0 !important;
+    border: 1px solid rgba(120,140,160,0.22) !important;
+}
+.nav-tabs > li.active > a {
+    background: rgba(35, 45, 65, 0.95) !important;
+    color: #e3ebf5 !important;
+}
+
+/* ======================================================
+   BOUTONS — Transparence + bleu-gris (aucun blanc)
+   ====================================================== */
+
+.btn,
+button,
+input[type="button"],
+input[type="submit"] {
+    background: rgba(120,140,170,0.32) !important;
+    color: #e6eef8 !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(140,160,190,0.32) !important;
+    backdrop-filter: blur(6px) !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    transition: 0.25s ease !important;
+}
+
+.btn:hover,
+button:hover {
+    background: rgba(150,170,200,0.45) !important;
+    transform: translateY(-1px);
+    color: #ffffff !important;
+}
+
+/* Boutons désactivés */
+.btn:disabled,
+button:disabled {
+    background: rgba(70,85,110,0.32) !important;
+    color: rgba(200,210,225,0.55) !important;
+    border: 1px solid rgba(90,110,140,0.25) !important;
+}
+
+/* Danger */
+.btn-danger {
+    background: rgba(170,45,45,0.75) !important;
+    color: #fff !important;
+}
+.btn-danger:hover {
+    background: rgba(150,40,40,0.85) !important;
+}
+
+/* ======================================================
+   INPUTS / SELECT
+   ====================================================== */
+input,
+select,
+textarea {
+    background-color: rgba(15, 22, 35, 0.85) !important;
+    color: #dde5ef !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(120,140,160,0.35) !important;
+}
+
+input::placeholder {
+    color: #9aa7b6 !important;
+}
+
+input[disabled],
+select[disabled] {
+    background: rgba(25, 32, 45, 0.60) !important;
+    color: #9aa7b6 !important;
+}
+
+/* ======================================================
+   TABLEAUX
+   ====================================================== */
+.table > thead {
+    background-color: rgba(10, 20, 35, 0.95) !important;
+}
+.table > tbody > tr:nth-child(odd) {
+    background-color: rgba(18, 25, 40, 0.85) !important;
+}
+.table > tbody > tr:nth-child(even) {
+    background-color: rgba(25, 32, 48, 0.85) !important;
+}
+
+/* ======================================================
+   NAVBAR
+   ====================================================== */
+.navbar {
+    background: rgba(5, 10, 20, 0.90) !important;
+    border-bottom: 1px solid rgba(120,140,160,0.25) !important;
+}
+.navbar a,
+.navbar span {
+    color: #d4dce6 !important;
+}
+
+/* ======================================================
+   DROPDOWN
+   ====================================================== */
+.dropdown-menu {
+    background: rgba(10,20,35,0.95) !important;
+    border: 1px solid rgba(120,140,160,0.25) !important;
+}
+.dropdown-menu > li > a {
+    color: #d4dce6 !important;
+}
+.dropdown-menu > li > a:hover {
+    background: rgba(255,255,255,0.08) !important;
+}
+
+/* ======================================================
+   SUPPRESSION DU RECTANGLE AUTOUR DES FOLDERS
+   ====================================================== */
+
+.folder,
+.folder:hover,
+.folder:active,
+.folder:focus,
+.device,
+.device:hover,
+.device:active,
+.device:focus,
+.panel-default,
+.panel-default:hover,
+.panel-default:focus,
+.panel-default:active {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.folder .panel-heading,
+.device .panel-heading,
+.panel-default .panel-heading {
+    background: rgba(40, 55, 75, 0.55) !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35) !important;
+}
+
+.folder:hover .panel-heading,
+.device:hover .panel-heading,
+.panel-default:hover .panel-heading {
+    background: rgba(60, 80, 110, 0.60) !important;
+    border: 1px solid rgba(255,255,255,0.16) !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.40) !important;
+}
